@@ -130,10 +130,10 @@
             {{ loop.index }}
             <span class="check-icon">{% if c.interview_done %}<i class="bi bi-check-circle-fill" style="color:#198754" title="Собеседование проведено"></i>{% endif %}</span>
           </td>
-          <td class="fw-semibold">{{ c.fio or '—' }}</td>
-          <td>{{ c.group_name or '—' }}</td>
-          <td>{{ c.interview_datetime or '—' }}</td>
-          <td>{{ c.phone or '—' }}</td>
+          <td class="fw-semibold" data-field="fio">{{ c.fio or '—' }}</td>
+          <td data-field="group_name">{{ c.group_name or '—' }}</td>
+          <td data-field="interview_datetime">{{ c.interview_datetime or '—' }}</td>
+          <td data-field="phone">{{ c.phone or '—' }}</td>
           <td>
             {% if c.contact_link %}
               {% if c.contact_link.startswith('http') or c.contact_link.startswith('t.me') %}
@@ -176,14 +176,65 @@
       <div class="modal-body">
         <div class="row g-4">
 
-          <!-- Read-only block -->
+          <!-- Editable anketa block -->
           <div class="col-md-5">
             <p class="section-label"><i class="bi bi-clipboard-data me-1"></i>Анкетные данные</p>
-            <div id="candidateDetails">
-              <div class="text-center text-muted py-4">
-                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                Загрузка...
-              </div>
+
+            <div class="mb-2">
+              <label class="field-label" for="f_registration_date">Дата регистрации</label>
+              <input type="text" class="form-control form-control-sm" id="f_registration_date" placeholder="—">
+            </div>
+            <div class="mb-2">
+              <label class="field-label" for="f_fio">ФИО</label>
+              <input type="text" class="form-control form-control-sm" id="f_fio" placeholder="—">
+            </div>
+            <div class="mb-2">
+              <label class="field-label" for="f_group_name">Учебная группа</label>
+              <input type="text" class="form-control form-control-sm" id="f_group_name" placeholder="—">
+            </div>
+            <div class="mb-2">
+              <label class="field-label" for="f_phone">Телефон</label>
+              <input type="text" class="form-control form-control-sm" id="f_phone" placeholder="—">
+            </div>
+            <div class="mb-2">
+              <label class="field-label" for="f_contact_link">Ссылка на связь</label>
+              <input type="text" class="form-control form-control-sm" id="f_contact_link" placeholder="—">
+            </div>
+            <div class="mb-2">
+              <label class="field-label" for="f_clothing_size">Размер одежды</label>
+              <input type="text" class="form-control form-control-sm" id="f_clothing_size" placeholder="—">
+            </div>
+            <div class="mb-2">
+              <label class="field-label" for="f_sopk_previously_worked">Работали в СОПК</label>
+              <input type="text" class="form-control form-control-sm" id="f_sopk_previously_worked" placeholder="—">
+            </div>
+            <div class="mb-2">
+              <label class="field-label" for="f_sopk_period">Период работы / доступности летом</label>
+              <input type="text" class="form-control form-control-sm" id="f_sopk_period" placeholder="—">
+            </div>
+            <div class="mb-2">
+              <label class="field-label" for="f_summer_practice">Летняя практика</label>
+              <input type="text" class="form-control form-control-sm" id="f_summer_practice" placeholder="—">
+            </div>
+            <div class="mb-2">
+              <label class="field-label" for="f_practice_period">Период практики</label>
+              <input type="text" class="form-control form-control-sm" id="f_practice_period" placeholder="—">
+            </div>
+            <div class="mb-2">
+              <label class="field-label" for="f_desired_department">Желаемое подразделение</label>
+              <input type="text" class="form-control form-control-sm" id="f_desired_department" placeholder="—">
+            </div>
+            <div class="mb-2">
+              <label class="field-label" for="f_source_info">Откуда узнали</label>
+              <input type="text" class="form-control form-control-sm" id="f_source_info" placeholder="—">
+            </div>
+            <div class="mb-2">
+              <label class="field-label" for="f_candidate_motivation">Мотивация кандидата</label>
+              <textarea class="form-control form-control-sm" id="f_candidate_motivation" rows="3" placeholder="—"></textarea>
+            </div>
+            <div class="mb-2">
+              <label class="field-label" for="f_interview_datetime">Дата/время собеседования</label>
+              <input type="text" class="form-control form-control-sm" id="f_interview_datetime" placeholder="ГГГГ-ММ-ДД ЧЧ:ММ">
             </div>
           </div>
 
@@ -301,15 +352,18 @@
     currentCandidateId = id;
     document.getElementById('modalTitle').innerHTML =
       '<i class="bi bi-person-circle me-2"></i>Загрузка...';
-    document.getElementById('candidateDetails').innerHTML =
-      '<div class="text-center text-muted py-4">' +
-      '<div class="spinner-border spinner-border-sm me-2" role="status"></div>Загрузка...</div>';
     document.getElementById('saveStatus').classList.add('d-none');
     document.getElementById('interview_done').checked = false;
     document.getElementById('dec_none').checked = true;
-    ['eval_motivation', 'eval_communication', 'eval_responsibility',
-     'eval_values', 'eval_comments'].forEach(f => {
-      document.getElementById(f).value = '';
+    const _allFields = [
+      'registration_date','fio','group_name','phone','contact_link','clothing_size',
+      'sopk_previously_worked','sopk_period','summer_practice','practice_period',
+      'desired_department','source_info','candidate_motivation','interview_datetime',
+      'eval_motivation','eval_communication','eval_responsibility','eval_values','eval_comments'
+    ];
+    _allFields.forEach(f => {
+      const el = document.getElementById(f) || document.getElementById('f_' + f);
+      if (el) el.value = '';
     });
     candidateModal.show();
 
@@ -319,42 +373,17 @@
         document.getElementById('modalTitle').innerHTML =
           '<i class="bi bi-person-circle me-2"></i>' + escapeHtml(data.fio || 'Кандидат');
 
-        const readonlyFields = [
-          ['Дата регистрации', data.registration_date],
-          ['Учебная группа', data.group_name],
-          ['Телефон', data.phone],
-          ['Ссылка на связь', data.contact_link],
-          ['Размер одежды', data.clothing_size],
-          ['Работали в СОПК', data.sopk_previously_worked],
-          ['Период работы в СОПК', data.sopk_period],
-          ['Летняя практика', data.summer_practice],
-          ['Период практики', data.practice_period],
-          ['Желаемое подразделение', data.desired_department],
-          ['Откуда узнали', data.source_info],
-          ['Мотивация кандидата', data.candidate_motivation],
-          ['Дата/время собеседования', data.interview_datetime],
-        ];
+        ['registration_date','fio','group_name','phone','contact_link','clothing_size',
+         'sopk_previously_worked','sopk_period','summer_practice','practice_period',
+         'desired_department','source_info','candidate_motivation','interview_datetime'
+        ].forEach(f => {
+          const el = document.getElementById('f_' + f);
+          if (el) el.value = data[f] || '';
+        });
 
-        const html = readonlyFields.map(([label, value]) => {
-          let display;
-          if (value && (value.startsWith('http') || value.startsWith('t.me'))) {
-            const href = value.startsWith('http') ? value : 'https://' + value;
-            display = '<a href="' + escapeHtml(href) + '" target="_blank" rel="noopener" ' +
-                      'class="contact-link">' + escapeHtml(value) + '</a>';
-          } else {
-            display = value
-              ? '<span>' + escapeHtml(value) + '</span>'
-              : '<span class="text-muted">—</span>';
-          }
-          return '<p class="mb-0 field-label">' + escapeHtml(label) + '</p>' +
-                 '<p class="field-value">' + display + '</p>';
-        }).join('');
-
-        document.getElementById('candidateDetails').innerHTML = html;
-
-        ['eval_motivation', 'eval_communication', 'eval_responsibility',
-         'eval_values', 'eval_comments'].forEach(field => {
-          document.getElementById(field).value = data[field] || '';
+        ['eval_motivation','eval_communication','eval_responsibility',
+         'eval_values','eval_comments'].forEach(f => {
+          document.getElementById(f).value = data[f] || '';
         });
 
         document.getElementById('interview_done').checked = !!data.interview_done;
@@ -364,10 +393,7 @@
         if (decRadio) decRadio.checked = true;
         else document.getElementById('dec_none').checked = true;
       })
-      .catch(() => {
-        document.getElementById('candidateDetails').innerHTML =
-          '<p class="text-danger">Ошибка загрузки данных.</p>';
-      });
+      .catch(() => alert('Ошибка загрузки данных кандидата.'));
   }
 
   function deleteCandidate() {
@@ -403,15 +429,18 @@
   }
 
   function saveCandidate() {
-    const payload = {
-      eval_motivation:     document.getElementById('eval_motivation').value,
-      eval_communication:  document.getElementById('eval_communication').value,
-      eval_responsibility: document.getElementById('eval_responsibility').value,
-      eval_values:         document.getElementById('eval_values').value,
-      eval_comments:       document.getElementById('eval_comments').value,
-      interview_done:      document.getElementById('interview_done').checked,
-      decision:            document.querySelector('input[name="decision"]:checked')?.value || '',
-    };
+    const payload = {};
+    ['registration_date','fio','group_name','phone','contact_link','clothing_size',
+     'sopk_previously_worked','sopk_period','summer_practice','practice_period',
+     'desired_department','source_info','candidate_motivation','interview_datetime'
+    ].forEach(f => { payload[f] = document.getElementById('f_' + f)?.value || ''; });
+    payload.eval_motivation     = document.getElementById('eval_motivation').value;
+    payload.eval_communication  = document.getElementById('eval_communication').value;
+    payload.eval_responsibility = document.getElementById('eval_responsibility').value;
+    payload.eval_values         = document.getElementById('eval_values').value;
+    payload.eval_comments       = document.getElementById('eval_comments').value;
+    payload.interview_done      = document.getElementById('interview_done').checked;
+    payload.decision            = document.querySelector('input[name="decision"]:checked')?.value || '';
 
     const btn = document.getElementById('saveBtn');
     btn.disabled = true;
@@ -440,6 +469,14 @@
               ? '<i class="bi bi-check-circle-fill" style="color:#198754" title="Собеседование проведено"></i>'
               : '';
           }
+
+          ['fio','group_name','interview_datetime','phone','contact_link'].forEach(f => {
+            const cell = row.querySelector(`td[data-field="${f}"]`);
+            if (cell) cell.textContent = payload[f] || '—';
+          });
+
+          document.getElementById('modalTitle').innerHTML =
+            '<i class="bi bi-person-circle me-2"></i>' + escapeHtml(payload.fio || 'Кандидат');
         }
       })
       .catch(() => alert('Ошибка при сохранении. Попробуйте ещё раз.'))
